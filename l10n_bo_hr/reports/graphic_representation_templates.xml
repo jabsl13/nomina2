@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="graphic_representation_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="self_company" t-value="doc.env.company"/>
+                <t t-call="web.internal_layout">
+                    <style>
+                        table, th, td {
+                        border: 1px solid black;
+                        border-collapse: collapse;
+                        }
+                    </style>
+                    <div class="page" style="font-size:10px;">
+                        <div align="center">
+                            <div class="col-4">
+                                <h5 align="center">BOLETA DE PAGO</h5>
+                                <h6 t-field="doc.name" class="mt16"/>
+                            </div>
+                        </div>
+                        <div class="row justify-content-start">
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>NOMBRES Y APELLIDOS:</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.employee_id" class="mt16"/>
+                            </div>
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>DOC. IDENTIDAD:</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.employee_id.identification_id" class="mt16"/>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-start">
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>CARGO:</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.employee_id.job_title" class="mt16"/>
+                            </div>
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>FECHA INGRESO:</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.contract_id.date_start" class="mt16"/>
+                            </div>
+                        </div>
+                        <div class="row justify-content-start">
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>SUELDO BÁSICO</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.contract_id.wage" class="mt16"/>
+                            </div>
+                            <div class="col-3">
+                                <p align="left">
+                                    <b>FASE/SECTOR</b>
+                                </p>
+                            </div>
+                            <div class="col-3">
+                                <p t-field="doc.contract_id.department_id.name" class="mt16"/>
+                            </div>
+                        </div>
+
+                        <table style="width:100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th align="right">INGRESOS</th>
+                                    <th align="right">DESCUENTOS</th>
+                                    <th align="right">APORTES EMPLEADOR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="tot_1" t-value="0"/>
+                                <t t-set="tot_2" t-value="0"/>
+                                <t t-set="tot_3" t-value="0"/>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <t t-foreach="doc.line_ids.filtered(lambda line: line.appears_on_payslip)"
+                                               t-as="det1">
+                                                <t t-if="det1.category_id.name in ('BASICO','BONOS')">
+                                                    <div style="float:left;width:150px;" t-esc="det1.name"/>
+                                                    <div t-esc="det1.total"
+                                                         digits="[42, 2]"
+                                                         t-options='{"widget": "monetary", "display_currency": det1.company_id.currency_id}'/>
+                                                    <t t-set="tot_1" t-value="tot_1 + det1.total"/>
+
+                                                </t>
+                                            </t>
+                                        </div>
+                                        <!--<table style="width:100%; border-collapse: collapse;">
+                                            <tr t-foreach="doc.line_ids.filtered(lambda line: line.appears_on_payslip)"
+                                                t-as="det">
+                                                <t t-if="det.category_id.name in ('BASICO','BONOS')">
+                                                    <td name="td_name">
+                                                        &#160;<t t-esc="det.name"/>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        &#160;<t t-esc="det.amount" digits="[42, 2]"
+                                                                 t-options='{"widget": "monetary", "display_currency": det.company_id.currency_id}'/>
+                                                        <t t-set="tot_1" t-value="tot_1 + det.amount"/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </table>-->
+
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <t t-foreach="doc.line_ids.filtered(lambda line: line.appears_on_payslip)"
+                                               t-as="det2">
+                                                <t t-if="det2.category_id.name in ('TOLERANCIA','DEDUCCIONES')">
+                                                    <div style="float:left;width:150px;" t-esc="det2.name"/>
+                                                    <div t-esc="det2.total"
+                                                         digits="[42, 2]"
+                                                         t-options='{"widget": "monetary", "display_currency": det2.company_id.currency_id}'/>
+                                                    <t t-set="tot_2" t-value="tot_2 + det2.total"/>
+
+                                                </t>
+                                            </t>
+                                        </div>
+                                        <!--
+                                        <table style="width:100%; border-collapse: collapse;">
+                                            <tr t-foreach="doc.line_ids.filtered(lambda line: line.appears_on_payslip)"
+                                                t-as="det">
+                                                <t t-if="det.category_id.name in ('TOLERANCIA','DEDUCCIONES')">
+                                                    <td name="td_name">
+                                                        &#160;<t t-esc="det.name"/>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        &#160;<t t-esc="det.amount" digits="[42, 2]"
+                                                                 t-options='{"widget": "monetary", "display_currency": det.company_id.currency_id}'/>
+                                                        <t t-set="tot_2" t-value="tot_2 + det.amount"/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </table>
+                                        -->
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <t t-foreach="doc.line_ids" t-as="det3">
+                                                <t t-if="det3.code in ('afp_inf_8','afp_inf_2','afp_inf_7','afp_inf_3')">
+
+                                                    <div style="float:left;width:150px;" t-esc="det3.name"/>
+                                                    <div
+                                                            t-esc="det3.total"
+                                                            digits="[42, 2]"
+                                                            t-options='{"widget": "monetary", "display_currency": det3.company_id.currency_id}'/>
+                                                    <t t-set="tot_3" t-value="tot_3 + det3.total"/>
+
+                                                </t>
+                                            </t>
+                                        </div>
+                                        <!--
+                                        <table style="width:100%; border-collapse: collapse;">
+                                            <tr t-foreach="doc.line_ids" t-as="det">
+                                                <t t-if="det.code in ('afp_inf_8','afp_inf_2','afp_inf_7','afp_inf_3')">
+                                                    <td name="td_name">
+                                                        &#160;<t t-esc="det.name"/>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        &#160;<t t-esc="det.amount" digits="[42, 2]"
+                                                                 t-options='{"widget": "monetary", "display_currency": det.company_id.currency_id}'/>
+                                                        <t t-set="tot_3" t-value="tot_3 + det.amount"/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </table>
+                                        -->
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Total Ganado:<span t-esc="'{0:,.2f}'.format(tot_1)"/>&#160;Bs.
+                                    </td>
+                                    <td>Total Descuentos:<span t-esc="'{0:,.2f}'.format(tot_2)"/>&#160;Bs.
+                                    </td>
+                                    <td>Total Aportes Empleador:<span t-esc="'{0:,.2f}'.format(tot_3)"/>&#160;Bs.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Importe Neto a Pagar:&#160;<span
+                                            t-esc="'{0:,.2f}'.format(doc.neto_pagar(doc))"/>
+                                        Bs.
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        &#160;Son:&#160;<span t-esc="doc.amount_literal(doc)"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <br/>
+                                        <br/>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <span t-field="doc.company_id.name"/>
+                                    </td>
+                                    <td></td>
+                                    <td align="center">
+                                        <p t-field="doc.contract_id.hr_responsible_id.partner_id.name" class="mt16"/>
+                                        <p t-field="doc.contract_id.hr_responsible_id.partner_id.vat" class="mt16"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

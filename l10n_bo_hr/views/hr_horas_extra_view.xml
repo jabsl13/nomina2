@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_horas_extra_tree" model="ir.ui.view">
+        <field name="name">hr.horas.extra.tree</field>
+        <field name="model">hr.horas.extra</field>
+        <field name="arch" type="xml">
+            <tree string="Registro RCIVA" editable="bottom">
+                <field name="company_id" invisible="1"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="hour" widget="float_time"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'validate'"/>
+                <button string="Aprobar" name="action_validate" type="object"
+                        icon="fa-check"
+                        states="draft"
+                        groups="hr_holidays.group_hr_holidays_manager"/>
+                <button string="Rechazar" name="action_refuse" type="object"
+                        icon="fa-times"
+                        states="draft"
+                        groups="hr_holidays.group_hr_holidays_manager"/>
+                <field name="type" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="act_hr_horas_extra">
+        <field name="name">Horas Extra</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.horas.extra</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('type', '=', 'normal')]</field>
+        <field name="context">{'default_type': 'normal'}</field>
+    </record>
+
+    <menuitem
+            id="menu_hr_horas_extra"
+            action="act_hr_horas_extra"
+            parent="hr_payroll.menu_hr_payroll_payslips"
+            sequence="111"/>
+
+    <record model="ir.actions.act_window" id="act_hr_horas_extra_noct">
+        <field name="name">Horas Extra Nocturno</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.horas.extra</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('type', '=', 'nocturno')]</field>
+        <field name="context">{'default_type': 'nocturno'}</field>
+    </record>
+
+    <menuitem
+            id="menu_hr_horas_extra1"
+            action="act_hr_horas_extra_noct"
+            parent="hr_payroll.menu_hr_payroll_payslips"
+            sequence="112"/>
+
+    <record model="ir.actions.act_window" id="act_hr_horas_extra_domi">
+        <field name="name">Horas Extra Dominical</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.horas.extra</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('type', '=', 'dominical')]</field>
+        <field name="context">{'default_type': 'dominical'}</field>
+    </record>
+
+    <menuitem
+            id="menu_hr_horas_extra2"
+            action="act_hr_horas_extra_domi"
+            parent="hr_payroll.menu_hr_payroll_payslips"
+            sequence="113"/>
+</odoo>
