@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<report
+		    id="hr_memo_report"
+		    model="hr.memo"
+		    string="Impresión de Memo"
+		    report_type="qweb-pdf"
+		    name="l10n_bo_hr.memo"
+		    file="l10n_bo_hr.memo"
+
+		/>
+
+        <record id="memo_paper" model="report.paperformat">
+            <field name="name">Memos</field>
+            <field name="default" eval="True"/>
+            <field name="format">Letter</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">25</field>
+            <field name="margin_bottom">25</field>
+            <field name="margin_left">30</field>
+            <field name="margin_right">25</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">20</field>
+            <field name="dpi">90</field>
+        </record>
+        <record id="hr_memo_report" model="ir.actions.report">
+            <field name="paperformat_id" ref="l10n_bo_hr.memo_paper"/>
+        </record>
+		<template id="memo">
+			<t t-call="web.html_container">
+		        <t t-foreach="docs" t-as="o">
+                    <div class="header">
+                    
+                    </div>
+					<div class="page container article o_report_layout_standard" style="font-size:10px; font-family: Arial;">
+                        <div class="row">
+                            <div class="col-4" name="logo">
+                            </div>
+                            <div class="col-4 text-center">
+                                <h5 style="padding-top:80px;"> <span t-field="o.title"/> <br/>
+                                <span t-field="o.number"/></h5>
+                            </div>
+                            <div class="col-4">
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-top: 15px;">
+                            <div class="col-2 offset-1">A</div>
+                            <div class="col-1 text-right">:</div>
+                            <div class="col-auto">
+                                <span t-field="o.employee_id.name"/><br/>
+                                <strong><span t-field="o.employee_id.job_id.name"/></strong>
+                            </div>
+
+                        </div>
+                        <div class="row" style="padding-top: 5px;">
+                            <div class="col-2 offset-1">De</div>
+                            <div class="col-1 text-right">:</div>
+                            <div class="col-auto">
+                                <t t-foreach="o.employee_from_ids" t-as="e"> 
+                                <div class="row">
+                                    <div class="col-auto mw-100" style="padding-bottom: 5px;">
+                                        <span t-field="e.name"/><br/>
+                                        <strong><span t-field="e.job_id.name"/></strong>
+                                    </div>
+                                </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-top: 5px;">
+                            <div class="col-2 offset-1">Fecha</div>
+                            <div class="col-1 text-right">:</div>
+                            <div class="col-auto"><span t-field="o.date"/></div>
+                        </div>
+
+                        <div class="row" style="padding-top: 5px;">
+                            <div class="col-2 offset-1">Ref.</div>
+                            <div class="col-1 text-right">:</div>
+                            <div class="col-auto"><strong t-field="o.name"/></div>
+                        </div>
+                        <div class="row" style="padding-top: 5px; border-bottom: 2px solid black;">
+                            <div class="col-12"></div>
+                        </div>
+
+                        <div class="row" style="padding-top: 5px;">
+                            <div class="col-12" t-raw="o.mensaje">
+                              
+                                
+                            </div>
+                        </div>
+
+                        <div class="row mt32 mb32" t-if="o.with_sign" style="padding-top: 10px;">
+                            <t t-foreach="o.employee_from_ids" t-as="e"> 
+                                <div class="col-6 text-center">
+                                    <span t-field="e.name"/><br/>
+                                    <strong><span t-field="e.job_id.name"/></strong>
+                                </div>
+                            </t>
+                        </div>
+                    
+
+                    </div><!-- END PAGE -->
+
+
+
+					<div class="footer o_standard_footer" >
+						<div class="row" t-if="o.employee_cc_ids" style="font-size: 10px; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 0px;">
+                            <div class="col-1"><strong>cc.</strong></div>
+                            <div class="col-auto">
+                                
+                                <t t-foreach="o.employee_cc_ids" t-as="ec">
+                                    <p style="font-size: 10px; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; margin-bottom: 0px;" t-field="ec.name"/>
+                                </t>
+                            </div>
+			            </div>
+					</div>
+				</t>
+			</t>
+		</template>
+	</data>
+</odoo>
