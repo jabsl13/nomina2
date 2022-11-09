@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.osv import expression
+from odoo.exceptions import ValidationError
 
 
 class custom_contract(models.Model):
@@ -35,7 +37,8 @@ class custom_contract(models.Model):
     contract_modality = fields.Selection(string='Modalidad Contrato', selection=[('1', 'Tiempo indefinido'),
                                                                                  ('2', 'A plazo fijo'),
                                                                                  ('3', 'Por Temporada'),
-                                                                                 ('4', 'Por realizacion de Obra o Servicio'),
+                                                                                 ('4',
+                                                                                  'Por realizacion de Obra o Servicio'),
                                                                                  ('5', 'Condicional o Eventual')],
                                          copy=False, default='1')
 
@@ -66,3 +69,37 @@ class custom_contract(models.Model):
     divisa_id = fields.Many2one('res.currency', string='Moneda Cta.', copy=False)
     bono_ids = fields.One2many(
         'hr.bono.contract', 'contract_id', string='Contratos')
+
+    # Habilitar para dos contratos pero solo un tipo de regla salarial
+    @api.constrains('employee_id', 'state', 'kanban_state', 'date_start', 'date_end')
+    def _check_current_contract(self):
+        """ Two contracts in state [incoming | open | close] cannot overlap """
+        for contract in self.filtered(lambda c: (c.state not in ['draft',
+                                                                 'cancel'] or c.state == 'draft' and c.kanban_state == 'done') and c.employee_id):
+            domain = [
+                ('id', '!=', contract.id),
+                ('employee_id', '=', contract.employee_id.id),
+                ('company_id', '=', contract.company_id.id),
+                ('structure_type_id', '=', contract.structure_type_id.id),
+                '|',
+                ('state', 'in', ['open', 'close']),
+                '&',
+                ('state', '=', 'draft'),
+                ('kanban_state', '=', 'done')  # replaces incoming
+            ]
+
+            if not contract.date_end:
+                start_domain = []
+                end_domain = ['|', ('date_end', '>=', contract.date_start), ('date_end', '=', False)]
+            else:
+                start_domain = [('date_start', '<=', contract.date_end)]
+                end_domain = ['|', ('date_end', '>', contract.date_start), ('date_end', '=', False)]
+
+            domain = expression.AND([domain, start_domain, end_domain])
+            if self.search_count(domain):
+                raise ValidationError(
+                    _(
+                        'Un empleado solo puede tener un contrato al mismo tiempo. (Excluyendo borradores y contratos cancelados).\n\nEmpleado: %(employee_name)s',
+                        employee_name=contract.employee_id.name
+                    )
+                )
