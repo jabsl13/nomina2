@@ -4,3 +4,4 @@ from . import payroll_afp
 from . import payroll_rciva
 from . import payroll_aportes
 from . import payroll_aguinaldo
+from . import hr_payroll_payslips_by_employees

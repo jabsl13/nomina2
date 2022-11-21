@@ -46,7 +46,9 @@
         'wizard/payroll_rciva.xml',
         'wizard/payroll_aportes.xml',
         'wizard/payroll_aguinaldo.xml',
+        'wizard/hr_payroll_payslips_by_employees_views.xml',
         'reports/graphic_representation.xml',
         'reports/graphic_representation_templates.xml',
+
     ],
 }

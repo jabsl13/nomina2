@@ -82,18 +82,19 @@ class custom_contract(models.Model):
                 ('company_id', '=', contract.company_id.id),
                 ('structure_type_id', '=', contract.structure_type_id.id),
                 '|',
-                ('state', 'in', ['open', 'close']),
+                ('state', 'in', ['open']),
                 '&',
                 ('state', '=', 'draft'),
-                ('kanban_state', '=', 'done')  # replaces incoming
+                ('kanban_state', '=', 'done')
             ]
-
-            if not contract.date_end:
-                start_domain = []
-                end_domain = ['|', ('date_end', '>=', contract.date_start), ('date_end', '=', False)]
-            else:
-                start_domain = [('date_start', '<=', contract.date_end)]
-                end_domain = ['|', ('date_end', '>', contract.date_start), ('date_end', '=', False)]
+            start_domain = []
+            end_domain = []
+            # if not contract.date_end:
+            #     start_domain = []
+            #     end_domain = ['|', ('date_end', '>=', contract.date_start), ('date_end', '=', False)]
+            # else:
+            #     start_domain = [('date_start', '<=', contract.date_end)]
+            #     end_domain = ['|', ('date_end', '>', contract.date_start), ('date_end', '=', False)]
 
             domain = expression.AND([domain, start_domain, end_domain])
             if self.search_count(domain):
