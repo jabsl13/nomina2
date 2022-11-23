@@ -19,6 +19,7 @@ class HrPayslipWorkedDays(models.Model):
             else:
                 sal_base = worked_days.payslip_id.contract_id.contract_wage
                 n_dias_lab = worked_days.number_of_days
+                n_dias_out = 0
                 if worked_days.work_entry_type_id.code != 'WORK100':
                     n_dias_out = worked_days.number_of_days
                     worked_days.amount = 0
