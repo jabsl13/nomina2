@@ -121,7 +121,7 @@
             <field name="category_id" ref="BASICBO"/>
             <field name="condition_select">none</field>
             <field name="amount_select">code</field>
-            <field name="amount_python_compute">result = contract.wage</field>
+            <field name="amount_python_compute">result = payslip.paid_amount</field>
             <field name="struct_id" ref="base_sueldos_salarios"/>
         </record>
 
@@ -149,7 +149,7 @@ result = calculo_bono_antiguedad(payslip)
             <field name="amount_select">code</field>
             <field name="amount_python_compute">
 if contract.bono_front:
-    result = contract.wage * 0.2
+    result = payslip.paid_amount * 0.2
 else:
     result = 0
             </field>

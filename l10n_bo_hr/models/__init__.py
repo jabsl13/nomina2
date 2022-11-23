@@ -13,3 +13,4 @@ from . import hr_adelantos
 from . import hr_prestamos
 from . import hr_horas_extra
 from . import hr_memo
+from . import hr_payslip_worked_days
