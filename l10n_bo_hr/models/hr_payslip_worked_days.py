@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from dateutil.relativedelta import relativedelta
 
 
 class HrPayslipWorkedDays(models.Model):
@@ -13,7 +14,7 @@ class HrPayslipWorkedDays(models.Model):
         # primero identificar los dias de falta
         n_dias_out = 0
         for worked_days in self.filtered(lambda wd: not wd.payslip_id.edited):
-            if worked_days.work_entry_type_id.code != 'WORK100':
+            if worked_days.work_entry_type_id.code == 'LEAVE90':
                 n_dias_out = worked_days.number_of_days
                 worked_days.amount = 0
 
@@ -26,6 +27,11 @@ class HrPayslipWorkedDays(models.Model):
             else:
                 sal_base = worked_days.payslip_id.contract_id.contract_wage
                 if worked_days.work_entry_type_id.code == 'WORK100':
-                    worked_days.amount = sal_base / 30 * (30 - n_dias_out)
+                    if worked_days.payslip_id.date_from < worked_days.contract_id.date_start:
+                        start = fields.Datetime.to_datetime(worked_days.payslip_id.date_from)
+                        stop = fields.Datetime.to_datetime(worked_days.contract_id.date_start)
+                        dias = (stop-start).days
+                        n_dias_out = n_dias_out + dias
+                    worked_days.amount = (sal_base / 30) * (30 - n_dias_out)
                 # worked_days.amount = worked_days.payslip_id.contract_id.contract_wage * worked_days.number_of_hours / (
                 #            worked_days.payslip_id.sum_worked_hours or 1) if worked_days.is_paid else 0
