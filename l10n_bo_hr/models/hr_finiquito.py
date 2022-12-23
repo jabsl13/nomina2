@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _, tools
 from datetime import datetime
 from datetime import date
+from dateutil import relativedelta
 
 
 class HrFiniquitoOther(models.Model):
@@ -80,19 +81,19 @@ class HrFiniquito(models.Model):
     @api.onchange('payslip_one_id')
     def onchange_payslip_one_id(self):
         for s in self.payslip_one_id.mapped('line_ids').filtered(lambda line: line.category_id).filtered(
-                lambda x: x.code == 'NET'):
+                lambda x: x.code == 'NET' or x.code == 'NETBO'):
             self.first_amount = s.total
 
     @api.onchange('payslip_second_id')
     def onchange_payslip_second_id(self):
         for s in self.payslip_second_id.mapped('line_ids').filtered(lambda line: line.category_id).filtered(
-                lambda x: x.code == 'NET'):
+                lambda x: x.code == 'NET' or x.code == 'NETBO'):
             self.second_amount = s.total
 
     @api.onchange('payslip_third_id')
     def onchange_payslip_third_id(self):
         for s in self.payslip_third_id.mapped('line_ids').filtered(lambda line: line.category_id).filtered(
-                lambda x: x.code == 'NET'):
+                lambda x: x.code == 'NET' or x.code == 'NETBO'):
             self.third_amount = s.total
 
     @api.onchange('date_to', 'date_from')
@@ -101,17 +102,20 @@ class HrFiniquito(models.Model):
             return
         if self.date_to == False:
             return
-        # data_entrada = datetime.strptime(self.date_from, '%Y-%m-%d')
-        # data_salida = datetime.strptime(self.date_to, '%Y-%m-%d')
         data_entrada = self.date_from
         data_salida = self.date_to
-        dif = (data_salida - data_entrada).days
-        years = float(dif) / 360
-        months = ((years - float(int(years))) * 360) / 30
-        days = ((months - float(int(months))) * 30)
-        self.years = int(years)
-        self.months = int(months)
-        self.days = days
+        delta = relativedelta.relativedelta(data_salida, data_entrada)
+        # print(delta.years, 'Años,', delta.months, 'meses,', delta.days, 'dias')
+        self.years = delta.years
+        self.months = delta.months
+        self.days = delta.days + 1
+        # dif = (data_salida - data_entrada).days
+        # years = float(dif) / 360
+        # months = ((years - float(int(years))) * 360) / 30
+        # days = ((months - float(int(months))) * 30)
+        # self.years = int(years)
+        # self.months = int(months)
+        # self.days = days
 
     company_id = fields.Many2one('res.company', string=u'Compañia', change_default=True,
                                  default=lambda self: self.env['res.company']._company_default_get('hr.finiquito'))
@@ -185,17 +189,24 @@ class HrFiniquito(models.Model):
         self.days_amount = (float(self.days) / 360) * promedio
         aguinaldo_months = 0
         aguinaldo_days = 0
+        aguinaldo_months_total = 0
+        aguinaldo_days_total = 0
+
+        self.benefit_ids.unlink()
         if self.years > 0:
             data_entrada = date(date.today().year, 1, 1)
             data_entrada = datetime.combine(data_entrada, datetime.min.time())
             data_salida = datetime.strptime(str(self.date_to), '%Y-%m-%d')
-            # data_salida = self.date_to
-            dif = (data_salida - data_entrada).days
-            years = float(dif) / 360
-            aguinaldo_months = ((years - float(int(years))) * 360) / 30
-            aguinaldo_days = ((aguinaldo_months - float(int(aguinaldo_months))) * 30)
+            delta = relativedelta.relativedelta(data_salida, data_entrada)
+            # dif = (data_salida - data_entrada).days
+            # years = float(dif) / 360
+            # aguinaldo_months = ((years - float(int(years))) * 360) / 30
+            # aguinaldo_days = ((aguinaldo_months - float(int(aguinaldo_months))) * 30)
+            aguinaldo_months = delta.months
+            aguinaldo_days = delta.days + 1
             aguinaldo_months_total = (aguinaldo_months / 12) * promedio
             aguinaldo_days_total = (aguinaldo_days / 360) * promedio
+
         self.months_bonus = aguinaldo_months
         self.days_bonus = aguinaldo_days
         self.bonus_amount = aguinaldo_months_total + aguinaldo_days_total
@@ -207,23 +218,31 @@ class HrFiniquito(models.Model):
             if self.holidays_day > 0:
                 if self.years <= 4:
                     a = 2
-                if self.years > 4 and self.years <= 9:
+                if 4 < self.years <= 9:
                     a = 1.5
                 if self.years > 9:
                     a = 1
                 total_vacacion = self.holidays_day / a / 360 * promedio
-                benefits.append((0, 0, {'code': 'otros', 'name': 'Vacacion', 'tiempo': self.holidays_day,
-                                        'medida': 'Dias', 'monto': total_vacacion, 'gestion': ''}))
+                benefits.append((0, 0, {'code': 'otros',
+                                        'name': 'Vacacion',
+                                        'tiempo': self.holidays_day,
+                                        'medida': 'Dias',
+                                        'monto': total_vacacion,
+                                        'gestion': ''}))
             if self.holidays_month > 0:
                 if self.years <= 4:
                     a = 2
-                if self.years > 4 and self.years <= 9:
+                if 4 < self.years <= 9:
                     a = 1.5
                 if self.years > 9:
                     a = 1
                 total_vacacion = self.holidays_day / a / 12 * promedio
-                benefits.append((0, 0, {'code': 'otros', 'name': 'Vacacion', 'tiempo': self.holidays_day,
-                                        'medida': 'Dias', 'monto': total_vacacion, 'gestion': ''}))
+                benefits.append((0, 0, {'code': 'otros',
+                                        'name': 'Vacacion',
+                                        'tiempo': self.holidays_day,
+                                        'medida': 'Dias',
+                                        'monto': total_vacacion,
+                                        'gestion': ''}))
             total_s = self.years_amount + self.months_amount + self.days_amount + self.bonus_amount + total_vacacion
             importe_liquido = total_s - deductions
             self.other_amount = promedio
@@ -235,14 +254,18 @@ class HrFiniquito(models.Model):
             self.amount_benefit = total_s
             self.amount_deduction = deductions
             self.amount_total_pay = importe_liquido
+        else:
+            self.amount_benefit = 0
+            self.amount_deduction = 0
+            self.amount_total_pay = 0
 
     def cancel_finiquito(self):
-        self.contract_id.date_out = False
+        self.contract_id.date_end = False
         self.contract_id.state = 'open'
         self.state = 'cancel'
 
     def done_finiquito(self):
-        #self.calcular_finiquito()
+        # self.calcular_finiquito()
         self.contract_id.date_end = self.date_to
         self.contract_id.state = 'close'
         self.state = 'done'

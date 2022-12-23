@@ -59,10 +59,11 @@
                                         <field name="amount_total"/>
                                     </tree>
                                 </field>
-                                <group class="oe_subtotal_footer oe_right">
-                                    <field name="other_amount"/>
+                                <group>
+                                    <group class="oe_subtotal_footer oe_right">
+                                        <field name="other_amount" colspan="2"/>
+                                    </group>
                                 </group>
-
                             </page>
                             <page string="Total Remuneración">
                                 <h4>Beneficios Sociales</h4>
@@ -94,8 +95,10 @@
                                         <field name="monto"/>
                                     </tree>
                                 </field>
-                                <group class="oe_subtotal_footer oe_right">
-                                    <field name="amount_benefit"/>
+                                <group>
+                                    <group class="oe_subtotal_footer oe_right">
+                                        <field name="amount_benefit" colspan="2"/>
+                                    </group>
                                 </group>
                             </page>
                             <page string="Deducciones">
@@ -105,13 +108,17 @@
                                         <field name="amount_total"/>
                                     </tree>
                                 </field>
-                                <group class="oe_subtotal_footer oe_right">
-                                    <field name="amount_deduction"/>
+                                <group>
+                                    <group class="oe_subtotal_footer oe_right">
+                                        <field name="amount_deduction" colspan="2"/>
+                                    </group>
                                 </group>
                             </page>
                         </notebook>
-                        <group class="oe_subtotal_footer oe_right">
-                            <field name="amount_total_pay"/>
+                        <group>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="amount_total_pay" colspan="2"/>
+                            </group>
                         </group>
                         <div class="oe_clear">
                             <label for="note"/>
@@ -138,9 +145,9 @@
             <field name="view_mode">tree,form</field>
         </record>
         <menuitem
-            id="menu_finiquito"
-            action="action_finiquito"
-            parent="hr_payroll.menu_hr_payroll_payslips"
-            sequence="102"/>
+                id="menu_finiquito"
+                action="action_finiquito"
+                parent="hr_payroll.menu_hr_payroll_payslips"
+                sequence="102"/>
     </data>
 </odoo>
